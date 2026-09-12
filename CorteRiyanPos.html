@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1e293b">
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Corte%20de%20Caja%20RiYanPOS%22%2C%22short_name%22%3A%22CortePos%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f8fafc%22%2C%22theme_color%22%3A%22%231e293b%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgcng9IjMyIiBmaWxsPSIjMWUyOTNiIi8%2BPHRleHQgeD0iOTYiIHk9IjEyOCIgZm9udC1zaXplPSIxMDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPvCfk4o8L3RleHQ%2BPC9zdmc%2B%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%22%7D%2C%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgcng9IjMyIiBmaWxsPSIjMWUyOTNiIi8%2BPHRleHQgeD0iOTYiIHk9IjEyOCIgZm9udC1zaXplPSIxMDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPvCfk4o8L3RleHQ%2BPC9zdmc%2B%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%22%7D%5D%7D">
+    <title>Corte de Caja - Calculadora y Desglose</title>
+    <style>
+        :root {
+            --primary: #1e293b;
+            --primary-light: #334155;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --success: #16a34a;
+            --success-bg: #f0fdf4;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --warning: #d97706;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-dark);
+            padding: 12px;
+            max-width: 600px;
+            margin: 0 auto;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: var(--primary);
+            color: #ffffff;
+            padding: 16px;
+            border-radius: var(--radius);
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+
+        .field-group label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .field-group input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 8px 6px;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .field-group input[type="date"] {
+            font-size: 14px;
+            padding: 8px 2px;
+            color-scheme: dark;
+        }
+
+        @media (max-width: 380px) {
+            .header-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .field-group input:focus {
+            border-color: #38bdf8;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .calc-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 0.95rem;
+        }
+
+        .calc-row input {
+            width: 120px;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            text-align: right;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary);
+            outline: none;
+        }
+
+        .calc-row input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
+        .total-box {
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+        }
+
+        .total-box .amount {
+            font-size: 1.2rem;
+            color: var(--accent);
+        }
+
+        .denom-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .denom-row {
+            display: grid;
+            grid-template-columns: 70px 1fr 100px;
+            align-items: center;
+            gap: 10px;
+            background: #f8fafc;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #f1f5f9;
+        }
+
+        .denom-label {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.95rem;
+        }
+
+        .denom-input-wrap {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .denom-input-wrap input {
+            width: 100%;
+            padding: 8px 4px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            outline: none;
+            background: #ffffff;
+        }
+
+        .denom-input-wrap input:focus {
+            border-color: var(--accent);
+            background: #fff;
+        }
+
+        .denom-total {
+            text-align: right;
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .badge-success {
+            background: var(--success-bg);
+            color: var(--success);
+            border: 1px solid #bbf7d0;
+        }
+
+        .badge-danger {
+            background: var(--danger-bg);
+            color: var(--danger);
+            border: 1px solid #fecaca;
+        }
+
+        .badge-neutral {
+            background: #f1f5f9;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .salidas-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .salida-item {
+            display: grid;
+            grid-template-columns: 100px 1fr 40px;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .salida-item input {
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .btn-delete {
+            background: #fee2e2;
+            color: var(--danger);
+            border: none;
+            border-radius: 6px;
+            height: 36px;
+            width: 36px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px dashed var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-outline:active {
+            background: #eff6ff;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #ffffff;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+        }
+
+        .btn-primary:active {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary-action {
+            background: #e2e8f0;
+            color: var(--primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-whatsapp {
+            background: #25d366;
+            color: #ffffff;
+            margin-top: 10px;
+        }
+
+        .btn-whatsapp:active {
+            background: #128c7e;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            border-radius: var(--radius);
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-box {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            white-space: pre;
+            font-size: 0.88rem;
+            line-height: 1.5;
+            color: #1e293b;
+            max-height: 350px;
+            overflow-x: auto;
+            overflow-y: auto;
+            margin: 12px 0;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn-secondary {
+            background: #64748b;
+            color: #ffffff;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-top: 1px solid var(--border);
+            margin-top: 8px;
+        }
+
+        .checkbox-row input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .checkbox-row label {
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .historial-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .historial-item:last-child {
+            border-bottom: none;
+        }
+
+        .historial-item .hist-fecha {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .historial-item .hist-sucursal {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Estilos de Impresión / PDF */
+        @media print {
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                padding: 0 !important;
+            }
+            .no-print, button, .btn, .btn-step, .btn-delete, .modal {
+                display: none !important;
+            }
+            header {
+                background: none !important;
+                color: #000000 !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                border-bottom: 2px solid #000;
+            }
+            header h1 { color: #000 !important; }
+            .field-group input {
+                color: #000 !important;
+                border: 1px solid #ccc !important;
+                background: none !important;
+            }
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+                page-break-inside: avoid;
+            }
+            .denom-row {
+                background: none !important;
+                border-bottom: 1px solid #eee !important;
+                grid-template-columns: 80px 1fr 100px !important;
+            }
+            .total-box {
+                background: #f1f5f9 !important;
+                border: 1px solid #ccc !important;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .denom-row {
+                grid-template-columns: 60px 1fr 85px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .header-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>
+            <span>📊 Corte de Caja</span>
+            <span style="font-size: 0.8rem; opacity: 0.8; font-weight: normal;">RiyanPOS</span>
+        </h1>
+        <div class="header-grid">
+            <div class="field-group">
+                <label>Fecha del día</label>
+                <input type="date" id="fecha" onchange="calcular()">
+            </div>
+            <div class="field-group">
+                <label>Sucursal / Negocio</label>
+                <input type="text" id="sucursal" value="ModeloCentro" oninput="calcular()">
+            </div>
+        </div>
+    </header>
+
+    <!-- 1. OBJETIVO EN CAJA -->
+    <div class="card">
+        <div class="card-title">
+            <span>1. Balance General en Ticket</span>
+        </div>
+        
+        <div class="calc-row">
+            <label for="cajaTicket">Caja (Total Ticket Efectivo):</label>
+            <input type="number" id="cajaTicket" value="0" min="0" placeholder="$0.00" step="0.01" oninput="calcular()">
+        </div>
+
+        <div class="calc-row">
+            <label for="fondoCaja">Fondo (Fijo):</label>
+            <input type="number" id="fondoCaja" value="2000" min="0" placeholder="$2000.00" step="0.01" oninput="calcular()">
+        </div>
+
+        <div class="total-box">
+            <span>Efectivo a Entregar:</span>
+            <span class="amount" id="efectivoObjetivo">$0.00</span>
+        </div>
+
+        <div class="checkbox-row">
+            <input type="checkbox" id="fondoVerificado" onchange="calcular()">
+            <label for="fondoVerificado">Fondo fijo verificado físicamente</label>
+        </div>
+    </div>
+
+    <!-- 2. DESGLOSE DE EFECTIVO -->
+    <div class="card">
+        <div class="card-title">
+            <span>2. Desglose de Efectivo Físico</span>
+            <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">Conteo</span>
+        </div>
+
+        <div class="denom-grid" id="denomContainer">
+            <!-- Renderizado dinámico desde JS -->
+        </div>
+
+        <div class="total-box" style="margin-top: 16px; background: #eff6ff;">
+            <span>Total Efectivo Contado:</span>
+            <span class="amount" id="totalEfectivoContado" style="color: var(--accent);">$0.00</span>
+        </div>
+    </div>
+
+    <!-- 3. RESULTADO DE CUADRE (DIFERENCIA) -->
+    <div class="card" id="cardResultado">
+        <div class="card-title">
+            <span>3. Cuadre de Caja</span>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 0.95rem; font-weight: 600;">Estado de Caja:</span>
+            <span id="badgeEstado" class="badge badge-neutral">Exacto</span>
+        </div>
+
+        <div class="calc-row">
+            <span style="font-weight: bold;">Diferencia:</span>
+            <span id="montoDiferencia" style="font-weight: bold; font-size: 1.1rem;">$0.00</span>
+        </div>
+    </div>
+
+    <!-- 4. SALIDAS Y GASTOS -->
+    <div class="card">
+        <div class="card-title">
+            <span>4. Salidas y Retiros</span>
+            <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">Comprobantes</span>
+        </div>
+
+        <div class="salidas-list" id="salidasContainer">
+            <!-- Salidas dinámicas -->
+        </div>
+
+        <button class="btn btn-outline no-print" onclick="agregarSalida()">+ Añadir Salida</button>
+
+        <div class="total-box" style="margin-top: 12px; background: #fff7ed;">
+            <span>Total Salidas:</span>
+            <span class="amount" id="totalSalidas" style="color: var(--warning);">$0.00</span>
+        </div>
+    </div>
+
+    <!-- BOTONES ACCIÓN PRINCIPAL -->
+    <button class="btn btn-primary no-print" onclick="generarResumen()" style="font-size: 1.05rem; padding: 14px;">
+        📋 Ver Resumen Limpio y Copiar
+    </button>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;" class="no-print">
+        <button class="btn btn-secondary-action" onclick="window.print()">🖨️ Imprimir / PDF</button>
+        <button class="btn btn-secondary-action" onclick="limpiarTodo()" style="color: var(--danger);">🗑️ Limpiar Todo</button>
+    </div>
+
+    <button class="btn btn-secondary-action no-print" onclick="verHistorial()" style="margin-top: 10px;">
+        🗂️ Ver Historial de Cortes
+    </button>
+
+    <!-- MODAL DE RESUMEN -->
+    <div class="modal" id="modalResumen">
+        <div class="modal-content">
+            <h2 style="font-size: 1.1rem; color: var(--primary); margin-bottom: 8px;">Resumen de Corte de Caja</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Alineación en columnas completada.</p>
+            
+            <div class="summary-box" id="resumenTexto"></div>
+
+            <div class="action-grid">
+                <button class="btn btn-secondary" onclick="cerrarModal()">Cerrar</button>
+                <button class="btn btn-primary" onclick="copiarAlPortapapeles()">📋 Copiar</button>
+            </div>
+            <button class="btn btn-whatsapp" onclick="enviarWhatsApp()">📱 Enviar por WhatsApp</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE HISTORIAL -->
+    <div class="modal" id="modalHistorial">
+        <div class="modal-content">
+            <h2 style="font-size: 1.1rem; color: var(--primary); margin-bottom: 8px;">Historial de Cortes</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Últimos 30 cortes guardados en este dispositivo.</p>
+
+            <div id="historialLista"></div>
+
+            <div class="action-grid" style="margin-top: 14px;">
+                <button class="btn btn-secondary" onclick="cerrarModalHistorial()">Cerrar</button>
+                <button class="btn" style="background:#fee2e2; color:var(--danger);" onclick="borrarHistorial()">Borrar historial</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const denominaciones = [1000, 500, 200, 100, 50, 20, 10, 5, 2, 1, 0.5];
+        const MAX_HISTORIAL = 30;
+        let sessionId = null;
+
+        function generarSessionId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+        }
+
+        // Variable global para mantener el bloqueo de pantalla
+        let wakeLock = null;
+
+        async function mantenerPantallaEncendida() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) {
+                console.log(`Wake Lock error: ${err.message}`);
+            }
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDenominaciones();
+            cargarEstadoLocal();
+            calcular();
+            mantenerPantallaEncendida();
+        });
+
+        function obtenerFechaHoy() {
+            const hoy = new Date();
+            const off = hoy.getTimezoneOffset();
+            const local = new Date(hoy.getTime() - off * 60000);
+            return local.toISOString().split('T')[0];
+        }
+
+        // Reactivar si sales y regresas a la app
+        document.addEventListener('visibilitychange', async () => {
+            if (wakeLock !== null && document.visibilityState === 'visible') {
+                await mantenerPantallaEncendida();
+            }
+        });
+
+        // Algunos navegadores móviles no conceden el wake lock si se pide sin interacción del usuario.
+        // Este reintento en el primer toque asegura que la pantalla no se apague durante el uso.
+        document.addEventListener('click', function reintentarWakeLock() {
+            if (wakeLock === null) mantenerPantallaEncendida();
+        }, { once: true });
+
+        function renderDenominaciones() {
+            const container = document.getElementById('denomContainer');
+            container.innerHTML = '';
+
+            denominaciones.forEach(val => {
+                const labelText = val >= 1 ? `$${val}` : `${val * 100}¢`;
+                const row = document.createElement('div');
+                row.className = 'denom-row';
+                row.innerHTML = `
+                    <div class="denom-label">${labelText}</div>
+                    <div class="denom-input-wrap">
+                        <input type="number" min="0" id="denom_${val}" placeholder="0" oninput="calcular()" onfocus="this.select()" inputmode="numeric">
+                    </div>
+                    <div class="denom-total" id="total_${val}">$0.00</div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function agregarSalida(monto = '', concepto = '', triggerCalcular = true) {
+            const container = document.getElementById('salidasContainer');
+            const id = Date.now() + Math.random().toString(36).substr(2, 4);
+            const div = document.createElement('div');
+            div.className = 'salida-item';
+            div.id = `salida_${id}`;
+            div.innerHTML = `
+                <input type="number" placeholder="Monto" min="0" step="0.01" value="${monto}" oninput="calcular()" onfocus="this.select()" class="salida-monto" inputmode="decimal">
+                <input type="text" placeholder="Concepto (ej. Tacos)" value="${concepto}" oninput="calcular()" class="salida-concepto">
+                <button class="btn-delete no-print" onclick="eliminarSalida('${id}')">×</button>
+            `;
+            container.appendChild(div);
+            if (triggerCalcular) calcular();
+        }
+
+        function eliminarSalida(id) {
+            const item = document.getElementById(`salida_${id}`);
+            if (item) item.remove();
+            calcular();
+        }
+
+        function formatoMoneda(valor) {
+            return new Intl.NumberFormat('es-MX', {
+                style: 'currency',
+                currency: 'MXN'
+            }).format(valor);
+        }
+
+        function calcular() {
+            // 1. Efectivo Objetivo
+            const cajaTicket = Math.max(0, parseFloat(document.getElementById('cajaTicket').value) || 0);
+            const fondoCaja = Math.max(0, parseFloat(document.getElementById('fondoCaja').value) || 0);
+            const efectivoObjetivo = cajaTicket - fondoCaja;
+
+            document.getElementById('efectivoObjetivo').innerText = formatoMoneda(efectivoObjetivo);
+
+            // 2. Desglose
+            let totalEfectivoContado = 0;
+            denominaciones.forEach(val => {
+                const qty = parseInt(document.getElementById(`denom_${val}`).value) || 0;
+                const subtotal = qty * val;
+                totalEfectivoContado += subtotal;
+                document.getElementById(`total_${val}`).innerText = formatoMoneda(subtotal);
+            });
+
+            document.getElementById('totalEfectivoContado').innerText = formatoMoneda(totalEfectivoContado);
+
+            // 3. Diferencia y Estado
+            const diferencia = totalEfectivoContado - efectivoObjetivo;
+            const badge = document.getElementById('badgeEstado');
+            const montoDifEl = document.getElementById('montoDiferencia');
+
+            montoDifEl.innerText = formatoMoneda(Math.abs(diferencia));
+
+            if (Math.abs(diferencia) < 0.01) {
+                badge.className = 'badge badge-success';
+                badge.innerText = 'Exacto';
+                montoDifEl.style.color = 'var(--success)';
+            } else if (diferencia > 0) {
+                badge.className = 'badge badge-success';
+                badge.innerText = 'Sobrante';
+                montoDifEl.style.color = 'var(--success)';
+            } else {
+                badge.className = 'badge badge-danger';
+                badge.innerText = 'Faltante';
+                montoDifEl.style.color = 'var(--danger)';
+            }
+
+            // 4. Salidas
+            let totalSalidas = 0;
+            const salidasMontos = document.querySelectorAll('.salida-monto');
+            salidasMontos.forEach(input => {
+                totalSalidas += Math.max(0, parseFloat(input.value) || 0);
+            });
+
+            document.getElementById('totalSalidas').innerText = formatoMoneda(totalSalidas);
+
+            // Autoguardado en LocalStorage
+            guardarEstadoLocal();
+        }
+
+        // Historial LocalStorage
+        function guardarEstadoLocal() {
+            const estado = {
+                sucursal: document.getElementById('sucursal').value,
+                fecha: document.getElementById('fecha').value,
+                cajaTicket: document.getElementById('cajaTicket').value,
+                fondoCaja: document.getElementById('fondoCaja').value,
+                fondoVerificado: document.getElementById('fondoVerificado').checked,
+                sessionId: sessionId,
+                denominaciones: {},
+                salidas: []
+            };
+
+            denominaciones.forEach(val => {
+                const el = document.getElementById(`denom_${val}`);
+                if (el) estado.denominaciones[val] = el.value;
+            });
+
+            const salidasItems = document.querySelectorAll('.salida-item');
+            salidasItems.forEach(item => {
+                const monto = item.querySelector('.salida-monto').value;
+                const concepto = item.querySelector('.salida-concepto').value;
+                estado.salidas.push({ monto, concepto });
+            });
+
+            localStorage.setItem('corte_riyan_pos_data', JSON.stringify(estado));
+        }
+
+        function cargarEstadoLocal() {
+            const fechaHoy = obtenerFechaHoy();
+            document.getElementById('fecha').value = fechaHoy;
+
+            const dataRaw = localStorage.getItem('corte_riyan_pos_data');
+            if (!dataRaw) {
+                sessionId = generarSessionId();
+                return;
+            }
+
+            try {
+                const estado = JSON.parse(dataRaw);
+
+                // La sucursal y el fondo fijo normalmente no cambian día a día, se conservan siempre
+                if (estado.sucursal !== undefined) document.getElementById('sucursal').value = estado.sucursal;
+                if (estado.fondoCaja !== undefined) document.getElementById('fondoCaja').value = estado.fondoCaja;
+
+                // Si el corte guardado es de un día distinto a hoy, se inicia un corte nuevo:
+                // no se arrastran el ticket, el conteo, las salidas ni la verificación del corte anterior.
+                if (estado.fecha && estado.fecha !== fechaHoy) {
+                    sessionId = generarSessionId();
+                    return;
+                }
+
+                sessionId = estado.sessionId || generarSessionId();
+
+                if (estado.cajaTicket !== undefined) document.getElementById('cajaTicket').value = estado.cajaTicket;
+                if (estado.fondoVerificado !== undefined) document.getElementById('fondoVerificado').checked = estado.fondoVerificado;
+
+                if (estado.denominaciones) {
+                    Object.keys(estado.denominaciones).forEach(val => {
+                        const el = document.getElementById(`denom_${val}`);
+                        if (el) el.value = estado.denominaciones[val];
+                    });
+                }
+
+                if (estado.salidas && Array.isArray(estado.salidas) && estado.salidas.length > 0) {
+                    document.getElementById('salidasContainer').innerHTML = '';
+                    estado.salidas.forEach(s => agregarSalida(s.monto, s.concepto, false));
+                }
+            } catch (e) {
+                console.error("Error al recuperar estado local:", e);
+                sessionId = generarSessionId();
+            }
+        }
+
+        function limpiarTodo() {
+            if (confirm('¿Estás seguro de que deseas reiniciar todos los valores del conteo?')) {
+                localStorage.removeItem('corte_riyan_pos_data');
+                location.reload();
+            }
+        }
+
+        // ---- HISTORIAL DE CORTES ----
+        function obtenerHistorial() {
+            try {
+                const raw = localStorage.getItem('corte_riyan_pos_historial');
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function guardarEnHistorial() {
+            const sucursal = document.getElementById('sucursal').value || 'General';
+            const fecha = document.getElementById('fecha').value || new Date().toISOString().split('T')[0];
+            const cajaTicket = Math.max(0, parseFloat(document.getElementById('cajaTicket').value) || 0);
+            const fondoCaja = Math.max(0, parseFloat(document.getElementById('fondoCaja').value) || 0);
+            const efectivoObjetivo = cajaTicket - fondoCaja;
+
+            let totalContado = 0;
+            denominaciones.forEach(val => {
+                const qty = parseInt(document.getElementById(`denom_${val}`).value) || 0;
+                totalContado += qty * val;
+            });
+
+            let totalSalidas = 0;
+            document.querySelectorAll('.salida-monto').forEach(input => {
+                totalSalidas += Math.max(0, parseFloat(input.value) || 0);
+            });
+
+            const diferencia = totalContado - efectivoObjetivo;
+            let estado = 'Exacto';
+            if (Math.abs(diferencia) >= 0.01) {
+                estado = diferencia > 0 ? 'Sobrante' : 'Faltante';
+            }
+
+            const registro = {
+                sessionId,
+                fecha,
+                hora: new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
+                sucursal,
+                cajaTicket,
+                fondoCaja,
+                totalContado,
+                totalSalidas,
+                diferencia,
+                estado,
+                fondoVerificado: document.getElementById('fondoVerificado').checked,
+                guardadoEn: new Date().toISOString()
+            };
+
+            let historial = obtenerHistorial();
+            // Si ya se guardó este mismo corte antes (mismo sessionId), se actualiza en vez de duplicarlo.
+            // Un corte nuevo (tras "Limpiar Todo") siempre genera un sessionId distinto y por lo tanto un registro nuevo,
+            // aunque sea el mismo día y la misma sucursal.
+            historial = historial.filter(h => h.sessionId !== registro.sessionId);
+            historial.unshift(registro);
+            historial = historial.slice(0, MAX_HISTORIAL);
+
+            localStorage.setItem('corte_riyan_pos_historial', JSON.stringify(historial));
+        }
+
+        function verHistorial() {
+            const historial = obtenerHistorial();
+            const lista = document.getElementById('historialLista');
+
+            if (historial.length === 0) {
+                lista.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem; padding: 12px 0;">Aún no hay cortes guardados. Se guardan automáticamente al generar el resumen.</p>';
+            } else {
+                lista.innerHTML = historial.map(h => {
+                    const color = h.estado === 'Faltante' ? 'var(--danger)' : (h.estado === 'Sobrante' ? 'var(--success)' : 'var(--text-muted)');
+                    return `
+                        <div class="historial-item" style="flex-direction: column; align-items: stretch; gap: 4px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div class="hist-fecha">${h.fecha}${h.hora ? ' · ' + h.hora : ''}</div>
+                                    <div class="hist-sucursal">${h.sucursal}${h.fondoVerificado ? ' · ✓ fondo verificado' : ''}</div>
+                                </div>
+                                <div style="text-align:right; color:${color}; font-weight:700;">
+                                    ${h.estado}<br>
+                                    <span style="font-size:0.85rem;">${formatoMoneda(Math.abs(h.diferencia))}</span>
+                                </div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.8rem; color: var(--text-muted); padding-top: 2px; border-top: 1px dashed var(--border);">
+                                <span>Ticket: ${formatoMoneda(h.cajaTicket)}</span>
+                                <span>Contado: ${formatoMoneda(h.totalContado)}</span>
+                                <span>Salidas: ${formatoMoneda(h.totalSalidas)}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            document.getElementById('modalHistorial').style.display = 'block';
+        }
+
+        function cerrarModalHistorial() {
+            document.getElementById('modalHistorial').style.display = 'none';
+        }
+
+        function borrarHistorial() {
+            if (confirm('¿Borrar todo el historial de cortes guardados en este dispositivo?')) {
+                localStorage.removeItem('corte_riyan_pos_historial');
+                verHistorial();
+            }
+        }
+
+        function obtenerTextoResumen() {
+            const sucursal = document.getElementById('sucursal').value || 'General';
+            const fecha = document.getElementById('fecha').value || new Date().toISOString().split('T')[0];
+            const cajaTicket = Math.max(0, parseFloat(document.getElementById('cajaTicket').value) || 0);
+            const fondoCaja = Math.max(0, parseFloat(document.getElementById('fondoCaja').value) || 0);
+            const efectivoObjetivo = cajaTicket - fondoCaja;
+            const fondoVerificado = document.getElementById('fondoVerificado').checked;
+
+            let texto = `📌 *CORTE DE CAJA - ${sucursal.toUpperCase()}*\n`;
+            texto += `📅 *Fecha:* ${fecha}\n`;
+            texto += `-----------------------------------\n`;
+            texto += `💵 *Caja (Ticket):* ${formatoMoneda(cajaTicket)}\n`;
+            texto += `🏦 *Fondo Fijo:* ${formatoMoneda(fondoCaja)}${fondoVerificado ? ' ✅ verificado' : ' ⚠️ sin verificar'}\n`;
+            texto += `🎯 *Efectivo a Entregar:* ${formatoMoneda(efectivoObjetivo)}\n`;
+            texto += `-----------------------------------\n`;
+            texto += `🧮 *DESGLOSE DE EFECTIVO:*\n`;
+
+            let tieneEfectivo = false;
+            let totalContado = 0;
+
+            denominaciones.forEach(val => {
+                const qty = parseInt(document.getElementById(`denom_${val}`).value) || 0;
+                if (qty > 0) {
+                    const subtotal = qty * val;
+                    totalContado += subtotal;
+                    const labelText = val >= 1 ? `$${val}` : `${val * 100}¢`;
+                    
+                    const denomCol = labelText.padStart(6, ' ');
+                    const qtyCol = qty.toString().padStart(3, ' ');
+                    const subtotalCol = formatoMoneda(subtotal).padStart(10, ' ');
+
+                    texto += ` • ${denomCol} x ${qtyCol} = ${subtotalCol}\n`;
+                    tieneEfectivo = true;
+                }
+            });
+
+            if (!tieneEfectivo) {
+                texto += `  (No se capturó efectivo)\n`;
+            }
+
+            texto += `\n💰 *Total Efectivo Contado:* ${formatoMoneda(totalContado)}\n`;
+
+            const diferencia = totalContado - efectivoObjetivo;
+            if (Math.abs(diferencia) < 0.01) {
+                texto += `✅ *Estado:* Cuadre Exacto ($0.00)\n`;
+            } else if (diferencia > 0) {
+                texto += `🟢 *Sobrante:* ${formatoMoneda(diferencia)}\n`;
+            } else {
+                texto += `🔴 *Faltante:* ${formatoMoneda(Math.abs(diferencia))}\n`;
+            }
+
+            const salidasItems = document.querySelectorAll('.salida-item');
+            if (salidasItems.length > 0) {
+                texto += `-----------------------------------\n`;
+                texto += `🧾 *SALIDAS Y GASTOS:*\n`;
+                let totalSalidas = 0;
+                salidasItems.forEach(item => {
+                    const monto = Math.max(0, parseFloat(item.querySelector('.salida-monto').value) || 0);
+                    const concepto = item.querySelector('.salida-concepto').value.trim() || 'Sin concepto';
+                    if (monto > 0) {
+                        texto += `  • ${formatoMoneda(monto)} = ${concepto}\n`;
+                        totalSalidas += monto;
+                    }
+                });
+                texto += `🔻 *Total Salidas:* ${formatoMoneda(totalSalidas)}\n`;
+            }
+
+            return texto;
+        }
+
+        function generarResumen() {
+            const texto = obtenerTextoResumen();
+            document.getElementById('resumenTexto').innerText = texto;
+            document.getElementById('modalResumen').style.display = 'block';
+            guardarEnHistorial();
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalResumen').style.display = 'none';
+        }
+
+        function copiarAlPortapapeles() {
+            const texto = obtenerTextoResumen();
+            navigator.clipboard.writeText(texto).then(() => {
+                alert('¡Resumen copiado al portapapeles!');
+            }).catch(err => {
+                alert('No se pudo copiar automáticamente.');
+            });
+        }
+
+        function enviarWhatsApp() {
+            const texto = obtenerTextoResumen();
+            const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+            window.open(url, '_blank');
+        }
+
+        // PWA Service Worker Inline
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                self.addEventListener('install', e => self.skipWaiting());
+                self.addEventListener('activate', e => self.clients.claim());
+                self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
+            `;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+        }
+    </script>
+</body>
+</html>
